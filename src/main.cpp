@@ -1,5 +1,6 @@
 #include <ETH.h>
 #include <Wire.h>
+#include <ESPmDNS.h>  // This is the correct include for ESP32
 #include "config.h"
 #include "webserver.h"
 #include "relays.h"
@@ -7,6 +8,8 @@
 #include <ArduinoOTA.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
+#include <esp_system.h>
+#include <time.h>
 
 // Definicje zmiennych globalnych
 int currentSpeed = 0;     // Domyślnie wentylator wyłączony
@@ -26,7 +29,13 @@ unsigned long lastSensorUpdateTime = 0;
 #define ETH_TYPE        ETH_PHY_LAN8720
 #define ETH_ADDR        1
 #define ETH_MDC_PIN     23
-#define ETH_MDIO_PIN    18
+#define ETH_MDIO_PIN     18
+
+#define NTP_SERVER1 "pool.ntp.org"
+#define NTP_SERVER2 "time.nist.gov"
+#define GMT_OFFSET_SEC 3600  // GMT+1 for Poland
+#define DAYLIGHT_OFFSET_SEC 3600  // 1 hour daylight saving
+
 void setupOTA() {
     ArduinoOTA.setHostname("Okap-OTA"); // Ustawienie własnej nazwy urządzenia OTA
 
@@ -65,34 +74,108 @@ void logRelayStates() {
     Serial.printf("aktualny bieg:  %d ", currentSpeed);
 }
 
+void setupTime() {
+    configTime(GMT_OFFSET_SEC, DAYLIGHT_OFFSET_SEC, NTP_SERVER1, NTP_SERVER2);
+    
+    Serial.println("Waiting for NTP time sync...");
+    time_t now = time(nullptr);
+    int retry = 0;
+    while (now < 24 * 3600 && retry < 10) {
+        delay(500);
+        Serial.print(".");
+        now = time(nullptr);
+        retry++;
+    }
+    Serial.println();
+    
+    struct tm timeinfo;
+    if (getLocalTime(&timeinfo)) {
+        Serial.println("Time synchronized!");
+        char timeStringBuff[50];
+        strftime(timeStringBuff, sizeof(timeStringBuff), "%A, %B %d %Y %H:%M:%S", &timeinfo);
+        Serial.println(timeStringBuff);
+    } else {
+        Serial.println("Failed to obtain time");
+    }
+}
+
 void setup() {
     Serial.begin(115200);
     delay(1000);
 
-    Serial.println("Inicjalizacja Ethernet...");
-    // Włączenie zasilania Ethernetu
+    preferences.begin("okap", false);
+
+    // Load network settings first
+    dhcpEnabled = preferences.getBool("dhcpEnabled", true);
+    staticIP = preferences.getString("staticIP", "192.168.1.200");
+    staticGateway = preferences.getString("staticGateway", "192.168.1.1");
+    staticNetmask = preferences.getString("staticNetmask", "255.255.255.0");
+
+    Serial.println("Network settings loaded:");
+    Serial.printf("DHCP: %s\n", dhcpEnabled ? "true" : "false");
+    Serial.printf("Static IP: %s\n", staticIP.c_str());
+    Serial.printf("Gateway: %s\n", staticGateway.c_str());
+    Serial.printf("Netmask: %s\n", staticNetmask.c_str());
+
+    // Power up Ethernet
     if (ETH_POWER_PIN >= 0) {
         pinMode(ETH_POWER_PIN, OUTPUT);
         digitalWrite(ETH_POWER_PIN, HIGH);
         delay(100);
     }
 
-    // Inicjalizacja Ethernetu
-    if (!ETH.begin(ETH_ADDR, ETH_POWER_PIN, ETH_MDC_PIN, ETH_MDIO_PIN, ETH_TYPE, ETH_CLK_MODE)) {
-        Serial.println("Błąd inicjalizacji Ethernet!");
-        while (true) delay(1000);
+    // Configure network before starting Ethernet
+    if (!dhcpEnabled) {
+        IPAddress ip;
+        IPAddress gateway;
+        IPAddress subnet;
+        
+        if (ip.fromString(staticIP) && gateway.fromString(staticGateway) && subnet.fromString(staticNetmask)) {
+            // Configure static IP directly
+            ETH.config(ip, gateway, subnet);
+            Serial.println("Static IP configured");
+        } else {
+            Serial.println("Invalid IP format - falling back to DHCP");
+            dhcpEnabled = true;
+        }
     }
 
-    Serial.println("Czekam na połączenie...");
-    while (!ETH.linkUp()) {
+    // Start Ethernet with new settings
+    ETH.begin(ETH_ADDR, ETH_POWER_PIN, ETH_MDC_PIN, ETH_MDIO_PIN, ETH_TYPE, ETH_CLK_MODE);
+    
+    // Wait for connection
+    int timeout = 0;
+    Serial.println("Waiting for connection...");
+    while (!ETH.linkUp() && timeout < 10) { // 5 second timeout
         delay(500);
         Serial.print(".");
+        timeout++;
     }
-    Serial.println("\nPołączono!");
-    Serial.print("Adres IP: ");
-    Serial.println(ETH.localIP());
-    Serial.print("MAC: ");
-    Serial.println(ETH.macAddress());
+
+    if (!ETH.linkUp()) {
+        Serial.println("\nEthernet connection failed!");
+        // Maybe add some error handling here
+    } else {
+        Serial.println("\nConnected!");
+        Serial.print("IP Address: ");
+        Serial.println(ETH.localIP());
+        Serial.print("Gateway: ");
+        Serial.println(ETH.gatewayIP());
+        Serial.print("Subnet Mask: ");
+        Serial.println(ETH.subnetMask());
+
+        setupTime();
+
+        // After Ethernet is connected, initialize mDNS
+        if (!MDNS.begin("okap")) {
+            Serial.println("Error setting up MDNS responder!");
+        } else {
+            MDNS.addService("http", "tcp", 80);  // Add this line to advertise HTTP service
+            Serial.println("mDNS responder started");
+            Serial.println("Device will be accessible at okap.local");
+        }
+    }
+
     setupOTA();  // Inicjalizacja OTA
     // Inicjalizacja przekaźników
     setupRelays();
@@ -126,12 +209,7 @@ void loop() {
     }
     
     ArduinoOTA.handle();
-    // Logowanie stanu przekaźników co sekundę
-    //if (millis() - lastRelayLogTime >= 1000) {
-    //    logRelayStates();
-    //    lastRelayLogTime = millis();
-    //}
-
+    
     if (millis() - lastSensorUpdateTime >= 1000) {
         updateSensorData();
         lastSensorUpdateTime = millis();
@@ -140,4 +218,19 @@ void loop() {
     if (gestureControlEnabled) {
         processGesture();
     }
+
+    // Optionally add periodic time sync check (every hour)
+    static unsigned long lastTimeSyncMillis = 0;
+    if (millis() - lastTimeSyncMillis > 3600000) {  // 1 hour
+        time_t now = time(nullptr);
+        struct tm timeinfo;
+        if (getLocalTime(&timeinfo)) {
+            char timeStringBuff[50];
+            strftime(timeStringBuff, sizeof(timeStringBuff), "%H:%M:%S", &timeinfo);
+            Serial.printf("Current time: %s\n", timeStringBuff);
+        }
+        lastTimeSyncMillis = millis();
+    }
+
+    // Remove MDNS.update() as it's not needed on ESP32
 }

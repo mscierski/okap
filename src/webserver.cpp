@@ -4,6 +4,7 @@
 #include <Preferences.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
+#include <ETH.h>  // Add ETH header
 #include "webserver.h"
 #include "relays.h"
 #include "config.h"
@@ -21,7 +22,7 @@ AsyncWebSocket ws("/ws");
 
 // Funkcja do powiadamiania klientów przez WebSocket
 void notifyClients() {
-    StaticJsonDocument<256> jsonResponse;
+    StaticJsonDocument<256> jsonResponse;  // Use StaticJsonDocument instead of JsonDocument
     jsonResponse["currentSpeed"] = currentSpeed;
     jsonResponse["temperature"] = temperature;
     jsonResponse["humidity"] = humidity;
@@ -166,14 +167,14 @@ void setupWebServer() {
         html += "<style>";
         html += "* { margin: 0; padding: 0; box-sizing: border-box; }";
         html += "body { font-family: 'Roboto', sans-serif; background-color: #121212; color: #ffffff; }";
-        html += "h1 { font-size: 3.5em; font-weight: 700; margin: 0; text-align: center; letter-spacing: 8px; transform: scaleX(1.2); text-transform: uppercase; }";
+        html += "h1 { font-size: 3em; font-weight: 700; margin: 0; text-align: left; letter-spacing: 8px;  }"; // Removed transform: scaleX
         html += ".title-card { background: #1e1e1e; border-radius: 8px; padding: 15px; margin: 15px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }";
         html += "h3 { font-size: 1.2em; font-weight: 400; margin: 15px 0; }";
         html += ".container { max-width: 600px; margin: 0 auto; padding: 20px; }";
         html += ".card { background: #1e1e1e; border-radius: 8px; padding: 20px; margin: 15px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }";
         html += ".separator { height: 1px; background: #303030; margin: 15px 0; }";
         html += ".speed-btns { display: flex; gap: 8px; justify-content: center; margin: 15px 0; }";
-        html += ".btn { background: #0288d1; color: white; border: none; padding: 12px 24px; border-radius: 4px; cursor: pointer; transition: background 0.3s; }";
+        html += ".btn { background: #0288d1; color: white; border: none; padding: 12px 24px; border-radius: 4px; cursor: pointer; transition: background 0.3s; width: 100%; margin-top: 15px; }";
         html += ".btn:hover { background: #039be5; }";
         html += ".btn-off { background: #424242; }";
         html += ".btn-off:hover { background: #616161; }";
@@ -190,6 +191,11 @@ void setupWebServer() {
         html += "input:checked + .slider:before { transform: translateX(26px); }";
         html += ".setting-row { display: flex; justify-content: space-between; align-items: center; margin: 10px 0; }";
         html += "input[type=\"number\"], input[type=\"text\"] { background: #303030; border: none; color: white; padding: 8px; border-radius: 4px; width: 120px; }";
+        // Add network settings styles
+        html += ".network-inputs { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 10px; }";
+        html += ".network-inputs.active { display: grid; }";
+        html += ".network-inputs.inactive { display: none; }";
+        html += "input[type=\"text\"] { background: #303030; border: none; color: white; padding: 8px; border-radius: 4px; width: 100%; }";
         html += "</style>";
         
         html += "<body>";
@@ -197,11 +203,12 @@ void setupWebServer() {
         
         // Separate title card
         html += "<div class=\"title-card\">";
-        html += "<h1>OKAP</h1>";
+         html += "<h2>turboOKAP</h2>";
         html += "</div>";
         
         // Speed control card (remove the title from here)
         html += "<div class=\"card\">";
+        //html += "<h1>turboOKAP</h1>";
         html += "<div class=\"current-speed\" id=\"currentSpeed\">" + String(currentSpeed == 0 ? "OFF" : String(currentSpeed)) + "</div>";
         html += "<div class=\"speed-indicator\">";
         for (int i = 1; i <= 4; i++) {
@@ -261,20 +268,57 @@ void setupWebServer() {
 
         // Default Speed Setting (before webhook)
         html += "<div class=\"card\">";
-        html += "<div class=\"setting-row\">";
         html += "<h3>Domyślny bieg:</h3>";
+        html += "<div class=\"setting-row\">";
         html += "<input type=\"number\" id=\"defaultInput\" min=\"1\" max=\"4\" value=\"" + String(defaultSpeed) + "\">";
-        html += "<button class=\"btn\" onclick=\"setDefault()\">Ustaw</button>";
         html += "</div>";
+        html += "<button class=\"btn\" onclick=\"setDefault()\">Ustaw</button>";
         html += "</div>";
 
         // 8. Webhook
         html += "<div class=\"card\">";
         html += "<h3>Webhook URL:</h3>";
-        html += "<div class=\"setting-row\">";
         html += "<input type=\"text\" id=\"webhookUrl\" placeholder=\"Podaj adres webhooka\" value=\"" + webhookUrl + "\">";
         html += "<button class=\"btn\" onclick=\"setWebhook()\">Zapisz</button>";
         html += "</div>";
+
+        // Network Settings section
+        html += "<div class=\"card\">";
+        html += "<div class=\"setting-row\">";
+        html += "<h3>Czas:</h3>";
+        struct tm timeinfo;
+        String timeStr = "Not synchronized";
+        if (getLocalTime(&timeinfo)) {
+            char timeStringBuff[50];
+            strftime(timeStringBuff, sizeof(timeStringBuff), "%Y-%m-%d %H:%M:%S", &timeinfo);
+            timeStr = String(timeStringBuff);
+        }
+        html += "<span class=\"sensor-value\">" + timeStr + "</span>";
+        html += "</div>";
+        html += "<div class=\"setting-row\">";
+        html += "<h3>Adres IP:</h3>";
+        html += "<span class=\"sensor-value\">" + ETH.localIP().toString() + "</span>";
+        html += "</div>";
+        html += "<div class=\"separator\"></div>";
+        html += "<div class=\"setting-row\">";
+        html += "<h3>DHCP</h3>";
+        html += "<label class=\"switch\"><input type=\"checkbox\" id=\"dhcpEnabled\" " + String(dhcpEnabled ? "checked" : "") + " onchange=\"toggleDHCP()\"><span class=\"slider\"></span></label>";
+        html += "</div>";
+        html += "<div id=\"networkInputs\" class=\"network-inputs " + String(dhcpEnabled ? "inactive" : "active") + "\">";
+        html += "<div class=\"setting-row\">";
+        html += "<label>IP Address:</label>";
+        html += "<input type=\"text\" id=\"ipAddress\" value=\"" + staticIP + "\" pattern=\"^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}$\">";
+        html += "</div>";
+        html += "<div class=\"setting-row\">";
+        html += "<label>Gateway:</label>";
+        html += "<input type=\"text\" id=\"gateway\" value=\"" + staticGateway + "\" pattern=\"^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}$\">";
+        html += "</div>";
+        html += "<div class=\"setting-row\">";
+        html += "<label>Netmask:</label>";
+        html += "<input type=\"text\" id=\"netmask\" value=\"" + staticNetmask + "\" pattern=\"^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}$\">";
+        html += "</div>";
+        html += "</div>";
+        html += "<button class=\"btn\" onclick=\"saveNetworkSettings()\">Zapisz i zrestartuj</button>";
         html += "</div>";
 
         html += "</div>"; // Close container
@@ -337,6 +381,33 @@ void setupWebServer() {
         html += "    body: JSON.stringify(data)";
         html += "  });";
         html += "}";
+        // Add these JavaScript functions before the closing </script> tag
+        html += "function toggleDHCP() {";
+        html += "  const enabled = document.getElementById('dhcpEnabled').checked;";
+        html += "  document.getElementById('networkInputs').className = 'network-inputs ' + (enabled ? 'inactive' : 'active');";
+        html += "}";
+        
+        html += "function saveNetworkSettings() {";
+        html += "  if (!confirm('Device will restart to apply network settings. Continue?')) return;";
+        html += "  const enabled = document.getElementById('dhcpEnabled').checked;";
+        html += "  const data = {";
+        html += "    dhcpEnabled: enabled,";
+        html += "    ipAddress: document.getElementById('ipAddress').value,";
+        html += "    gateway: document.getElementById('gateway').value,";
+        html += "    netmask: document.getElementById('netmask').value";
+        html += "  };";
+        html += "  fetch('/network', {";
+        html += "    method: 'POST',";
+        html += "    headers: { 'Content-Type': 'application/json' },";
+        html += "    body: JSON.stringify(data)";
+        html += "  }).then(response => {";
+        html += "    if (response.ok) {";
+        html += "      alert('Network settings saved. Device will restart.');";
+        html += "      setTimeout(() => { window.location.href = '/'; }, 2000);";  // Redirect after 2 seconds
+        html += "    }";
+        html += "  });";
+        html += "}";
+
         html += "</script>";
         html += "</body>";
         html += "</html>";
@@ -345,7 +416,7 @@ void setupWebServer() {
 
     server.on("/state", HTTP_POST, [](AsyncWebServerRequest *request) {}, nullptr, [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
         String body = String((char *)data).substring(0, len);
-        DynamicJsonDocument doc(static_cast<size_t>(200));
+        StaticJsonDocument<200> doc;  // Use StaticJsonDocument
         deserializeJson(doc, body);
         int speed = doc["speed"];
         setFanSpeed(speed);
@@ -358,7 +429,7 @@ void setupWebServer() {
     // Obsługa ustawiania domyślnego biegu
     server.on("/default", HTTP_POST, [](AsyncWebServerRequest *request) {}, nullptr, [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
         String body = String((char *)data).substring(0, len);
-        DynamicJsonDocument doc(static_cast<size_t>(200));
+        StaticJsonDocument<200> doc;  // Use StaticJsonDocument
         deserializeJson(doc, body);
         int speed = doc["default"];
         if (speed < 0 || speed > 4) {
@@ -373,7 +444,7 @@ void setupWebServer() {
 
     server.on("/gesture", HTTP_POST, [](AsyncWebServerRequest *request) {}, nullptr, [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
         String body = String((char *)data).substring(0, len);
-        DynamicJsonDocument doc(static_cast<size_t>(200));
+        StaticJsonDocument<200> doc;  // Use StaticJsonDocument
         deserializeJson(doc, body);
         gestureControlEnabled = doc["enabled"];
         preferences.putBool("gestureEnabled", gestureControlEnabled);  // Add this line
@@ -384,7 +455,7 @@ void setupWebServer() {
     server.on("/autoSettings", HTTP_POST, [](AsyncWebServerRequest *request) {}, nullptr, 
         [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
             String body = String((char *)data).substring(0, len);
-            DynamicJsonDocument doc(200);
+            StaticJsonDocument<200> doc;  // Use StaticJsonDocument
             deserializeJson(doc, body);
             
             autoActivationEnabled = doc["enabled"];
@@ -399,6 +470,55 @@ void setupWebServer() {
 
             notifyClients();
             request->send(200);
+    });
+
+    // Update the network settings endpoint
+    server.on("/network", HTTP_POST, [](AsyncWebServerRequest *request) {}, nullptr, 
+        [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
+            String body = String((char *)data).substring(0, len);
+            StaticJsonDocument<200> doc;
+            deserializeJson(doc, body);
+            
+            bool newDhcpEnabled = doc["dhcpEnabled"];
+            String newStaticIP = doc["ipAddress"].as<String>();
+            String newGateway = doc["gateway"].as<String>();
+            String newNetmask = doc["netmask"].as<String>();
+
+            // Validate IP addresses before saving
+            IPAddress ip, gateway, subnet;
+            if (!newDhcpEnabled) {
+                if (!ip.fromString(newStaticIP) || 
+                    !gateway.fromString(newGateway) || 
+                    !subnet.fromString(newNetmask)) {
+                    request->send(400, "application/json", "{\"error\":\"Invalid IP format\"}");
+                    return;
+                }
+            }
+
+            Serial.println("Saving network settings:");
+            Serial.printf("DHCP: %s\n", newDhcpEnabled ? "true" : "false");
+            Serial.printf("IP: %s\n", newStaticIP.c_str());
+            Serial.printf("Gateway: %s\n", newGateway.c_str());
+            Serial.printf("Netmask: %s\n", newNetmask.c_str());
+
+            // Save to preferences
+            preferences.putBool("dhcpEnabled", newDhcpEnabled);
+            preferences.putString("staticIP", newStaticIP);
+            preferences.putString("staticGateway", newGateway);
+            preferences.putString("staticNetmask", newNetmask);
+            
+            // Ensure settings are saved
+            preferences.end();
+            
+            request->send(200);
+            delay(500);
+
+            // Force network reconfiguration
+            if (!newDhcpEnabled) {
+                ETH.config(ip, gateway, subnet);
+            }
+            
+            ESP.restart();
     });
 
     ws.onEvent(onWebSocketEvent);

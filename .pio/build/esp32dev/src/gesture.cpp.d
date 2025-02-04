@@ -152,4 +152,5 @@
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-spi.h \
  .pio/libdeps/esp32dev/Adafruit\ Unified\ Sensor@src-b66dc39c11b28c567c715313bb4d4d54/Adafruit_Sensor.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/Print.h \
- include/relays.h include/webserver.h
+ include/relays.h include/webserver.h \
+ C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/libraries/Preferences/src/Preferences.h

@@ -42,4 +42,10 @@ extern float humRiseThreshold;
 extern unsigned long monitoringInterval;
 extern bool autoActivationEnabled;
 
+// Network settings
+extern bool dhcpEnabled;
+extern String staticIP;
+extern String staticGateway;
+extern String staticNetmask;  // Add this line
+
 #endif

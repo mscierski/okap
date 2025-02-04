@@ -256,6 +256,7 @@
  .pio/libdeps/esp32dev/Adafruit\ BusIO@src-1c59a2908cd7e8f991f92381d560d371/Adafruit_SPIDevice.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/libraries/SPI/src/SPI.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-spi.h \
+ C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/libraries/Ethernet/src/ETH.h \
  include/webserver.h include/relays.h include/config.h include/gesture.h \
  .pio/libdeps/esp32dev/Adafruit_VL53L0X/src/Adafruit_VL53L0X.h \
  .pio/libdeps/esp32dev/Adafruit_VL53L0X/src/vl53l0x_api.h \

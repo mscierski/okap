@@ -2,6 +2,7 @@
 #define WEBSERVER_H
 
 #include <Arduino.h>
+#include <Preferences.h>
 
 // Zewnętrzne zmienne globalne
 extern int currentSpeed;
@@ -10,6 +11,7 @@ extern String webhookUrl;
 extern float temperature;
 extern float humidity;
 extern bool gestureControlEnabled;
+extern Preferences preferences;  // Add this line
 
 // Funkcje do obsługi serwera WWW
 void setupWebServer();

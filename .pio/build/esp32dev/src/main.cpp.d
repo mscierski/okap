@@ -198,6 +198,8 @@
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/cbuf.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/libraries/Wire/src/Wire.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal.h \
+ C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/libraries/ESPmDNS/src/ESPmDNS.h \
+ C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/mdns/include/mdns.h \
  include/config.h \
  .pio/libdeps/esp32dev/Adafruit\ BME280\ Library/Adafruit_BME280.h \
  .pio/libdeps/esp32dev/Adafruit\ BusIO@src-1c59a2908cd7e8f991f92381d560d371/Adafruit_I2CDevice.h \
@@ -205,7 +207,9 @@
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/libraries/SPI/src/SPI.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-spi.h \
  .pio/libdeps/esp32dev/Adafruit\ Unified\ Sensor@src-b66dc39c11b28c567c715313bb4d4d54/Adafruit_Sensor.h \
- include/webserver.h include/relays.h include/gesture.h \
+ include/webserver.h \
+ C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/libraries/Preferences/src/Preferences.h \
+ include/relays.h include/gesture.h \
  .pio/libdeps/esp32dev/Adafruit_VL53L0X/src/Adafruit_VL53L0X.h \
  .pio/libdeps/esp32dev/Adafruit_VL53L0X/src/vl53l0x_api.h \
  .pio/libdeps/esp32dev/Adafruit_VL53L0X/src/vl53l0x_api_strings.h \
