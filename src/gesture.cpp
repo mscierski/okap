@@ -50,6 +50,7 @@ void processGesture() {
                         setFanSpeed(currentSpeed);
                         lastStepTime = millis(); // Aktualizuj czas ostatniej zmiany biegu
                         sendWebhookRequest(currentSpeed);
+                        notifyClients();
                     }
                 }
             } else {
@@ -60,6 +61,7 @@ void processGesture() {
                     currentSpeed = (currentSpeed == 0) ? defaultSpeed : 0;
                     setFanSpeed(currentSpeed);
                     sendWebhookRequest(currentSpeed);
+                    notifyClients();
                 }
 
                 // Reset flag

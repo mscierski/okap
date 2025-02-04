@@ -11,4 +11,5 @@ extern String webhookUrl;
 // Funkcje do obsługi serwera WWW
 void setupWebServer();
 void sendWebhookRequest(int speed);
+void notifyClients();
 #endif
