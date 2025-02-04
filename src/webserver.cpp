@@ -78,6 +78,17 @@ void updateSensorData() {
     float newTemperature = bme.readTemperature();
     float newHumidity = bme.readHumidity();
     
+    // Initialize last values if they are zero (first run)
+    if (lastTemperature == 0) {
+        lastTemperature = newTemperature;
+        lastHumidity = newHumidity;
+        lastMonitoringTime = millis();
+        temperature = newTemperature;
+        humidity = newHumidity;
+        notifyClients();
+        return; // Skip the first reading to avoid false triggers
+    }
+    
     // Calculate rate of change per minute
     unsigned long timeDiff = (millis() - lastMonitoringTime) / 1000.0f; // Convert to seconds
     if (autoActivationEnabled && timeDiff >= (monitoringInterval / 1000)) { // Check every monitoringInterval seconds
@@ -151,53 +162,133 @@ void setupWebServer() {
         html += "<meta charset=\"UTF-8\">";
         html += "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">";
         html += "<title>Okap - Sterowanie</title>";
+        html += "<link href=\"https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap\" rel=\"stylesheet\">";
         html += "<style>";
-        html += "body { font-family: Arial, sans-serif; text-align: center; margin: 0; padding: 0; background-color: #f4f4f4; }";
-        html += "h1 { margin: 20px 0; font-size: 2.5em; }";
-        html += "h3 { margin: 10px 0; font-size: 1.5em; }";
-        html += "button { margin: 5px; padding: 15px 25px; font-size: 18px; border: none; border-radius: 5px; background-color: #007BFF; color: white; cursor: pointer; transition: background-color 0.3s ease; }";
-        html += "button:hover { background-color: #0056b3; }";
-        html += "input[type=\"text\"], input[type=\"number\"] { padding: 10px; font-size: 18px; width: 60%; margin-right: 10px; text-align: center; }";
-        html += "#container { max-width: 600px; margin: auto; padding: 20px; background: white; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); border-radius: 10px; }";
+        html += "* { margin: 0; padding: 0; box-sizing: border-box; }";
+        html += "body { font-family: 'Roboto', sans-serif; background-color: #121212; color: #ffffff; }";
+        html += "h1 { font-size: 3.5em; font-weight: 700; margin: 0; text-align: center; letter-spacing: 8px; transform: scaleX(1.2); text-transform: uppercase; }";
+        html += ".title-card { background: #1e1e1e; border-radius: 8px; padding: 15px; margin: 15px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }";
+        html += "h3 { font-size: 1.2em; font-weight: 400; margin: 15px 0; }";
+        html += ".container { max-width: 600px; margin: 0 auto; padding: 20px; }";
+        html += ".card { background: #1e1e1e; border-radius: 8px; padding: 20px; margin: 15px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }";
+        html += ".separator { height: 1px; background: #303030; margin: 15px 0; }";
+        html += ".speed-btns { display: flex; gap: 8px; justify-content: center; margin: 15px 0; }";
+        html += ".btn { background: #0288d1; color: white; border: none; padding: 12px 24px; border-radius: 4px; cursor: pointer; transition: background 0.3s; }";
+        html += ".btn:hover { background: #039be5; }";
+        html += ".btn-off { background: #424242; }";
+        html += ".btn-off:hover { background: #616161; }";
+        html += ".current-speed { font-size: 3.5em; font-weight: 300; color: #0288d1; margin: 20px 0; text-align: center; }";
+        html += ".sensor-value { font-size: 1.5em; color: #0288d1; }";
+        html += ".speed-indicator { display: flex; justify-content: center; gap: 4px; margin: 15px 0; }";
+        html += ".speed-bar { width: 8px; height: 30px; background: #303030; border-radius: 4px; }";
+        html += ".speed-bar.active { background: #0288d1; }";
+        html += ".switch { position: relative; display: inline-block; width: 60px; height: 34px; }";
+        html += ".switch input { opacity: 0; width: 0; height: 0; }";
+        html += ".slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #303030; transition: .4s; border-radius: 34px; }";
+        html += ".slider:before { position: absolute; content: \"\"; height: 26px; width: 26px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }";
+        html += "input:checked + .slider { background-color: #0288d1; }";
+        html += "input:checked + .slider:before { transform: translateX(26px); }";
+        html += ".setting-row { display: flex; justify-content: space-between; align-items: center; margin: 10px 0; }";
+        html += "input[type=\"number\"], input[type=\"text\"] { background: #303030; border: none; color: white; padding: 8px; border-radius: 4px; width: 120px; }";
         html += "</style>";
-        html += "</head>";
+        
         html += "<body>";
-        html += "<div id=\"container\">";
+        html += "<div class=\"container\">";
+        
+        // Separate title card
+        html += "<div class=\"title-card\">";
         html += "<h1>OKAP</h1>";
-        html += "<h3>Aktualny bieg: <span id=\"currentSpeed\">" + String(currentSpeed) + "</span></h3>";
-        html += "<h3>Temperatura: <span id=\"temperature\">" + String(temperature, 1) + " °C</span></h3>";
-        html += "<h3>Wilgotność: <span id=\"humidity\">" + String(humidity, 1) + " %</span></h3>";
-        html += "<h3>Gesty: <input type=\"checkbox\" id=\"gestureControl\" " + String(gestureControlEnabled ? "checked" : "") + " onchange=\"toggleGestureControl()\"></h3>";
-        html += "<form id=\"defaultForm\">";
-        html += "<h3>Ustaw domyślny bieg:</h3>";
-        html += "<input type=\"number\" id=\"defaultInput\" min=\"0\" max=\"4\" value=\"" + String(defaultSpeed) + "\">";
-        html += "<button type=\"button\" onclick=\"setDefault()\">Ustaw</button>";
-        html += "</form>";
-        html += "<h3>Ustaw prędkość:</h3>";
-        html += "<div>";
-        for (int i = 0; i <= 4; i++) {
-            html += "<button onclick=\"setSpeed(" + String(i) + ")\">" + String(i) + "</button>";
+        html += "</div>";
+        
+        // Speed control card (remove the title from here)
+        html += "<div class=\"card\">";
+        html += "<div class=\"current-speed\" id=\"currentSpeed\">" + String(currentSpeed == 0 ? "OFF" : String(currentSpeed)) + "</div>";
+        html += "<div class=\"speed-indicator\">";
+        for (int i = 1; i <= 4; i++) {
+            html += "<div class=\"speed-bar" + String(currentSpeed >= i ? " active" : "") + "\"></div>";
         }
         html += "</div>";
-        html += "<h3>Webhook:</h3>";
-        html += "<form id=\"webhookForm\">";
+        // 3. Speed Control Buttons
+        html += "<div class=\"speed-btns\">";
+        html += "<button class=\"btn btn-off\" onclick=\"setSpeed(0)\">OFF</button>";
+        for (int i = 1; i <= 4; i++) {
+            html += "<button class=\"btn\" onclick=\"setSpeed(" + String(i) + ")\">" + String(i) + "</button>";
+        }
+        html += "</div>";
+        html += "</div>";
+
+        // 4. Temperature and Humidity
+        html += "<div class=\"card\">";
+        html += "<div class=\"setting-row\">";
+        html += "<h3>Temperatura:</h3>";
+        html += "<span class=\"sensor-value\" id=\"temperature\">" + String(temperature, 1) + " °C</span>";
+        html += "</div>";
+        html += "<div class=\"setting-row\">";
+        html += "<h3>Wilgotność:</h3>";
+        html += "<span class=\"sensor-value\" id=\"humidity\">" + String(humidity, 1) + " %</span>";
+        html += "</div>";
+        html += "</div>";
+
+        // 5. Gesture Control
+        html += "<div class=\"card\">";
+        html += "<div class=\"setting-row\">";
+        html += "<h3>Sterowanie gestami</h3>";
+        html += "<label class=\"switch\"><input type=\"checkbox\" id=\"gestureControl\" " + String(gestureControlEnabled ? "checked" : "") + " onchange=\"toggleGestureControl()\"><span class=\"slider\"></span></label>";
+        html += "</div>";
+        html += "</div>";
+
+        // 6. Automation Control and 7. Settings
+        html += "<div class=\"card\">";
+        html += "<div class=\"setting-row\">";
+        html += "<h3>Automatyka</h3>";
+        html += "<label class=\"switch\"><input type=\"checkbox\" id=\"autoActivation\" " + String(autoActivationEnabled ? "checked" : "") + " onchange=\"updateAutoSettings()\"><span class=\"slider\"></span></label>";
+        html += "</div>";
+        html += "<div class=\"separator\"></div>";
+        html += "<div class=\"setting-row\">";
+        html += "<label>Próg temperatury (°C/min):</label>";
+        html += "<input type=\"number\" id=\"tempThreshold\" value=\"" + String(tempRiseThreshold) + "\" step=\"0.1\" min=\"0.1\" max=\"10\">";
+        html += "</div>";
+        html += "<div class=\"setting-row\">";
+        html += "<label>Próg wilgotności (%/min):</label>";
+        html += "<input type=\"number\" id=\"humThreshold\" value=\"" + String(humRiseThreshold) + "\" step=\"0.1\" min=\"0.1\" max=\"20\">";
+        html += "</div>";
+        html += "<div class=\"setting-row\">";
+        html += "<label>Interwał sprawdzania (s):</label>";
+        html += "<input type=\"number\" id=\"checkInterval\" value=\"" + String(monitoringInterval/1000) + "\" min=\"1\" max=\"60\">";
+        html += "</div>";
+        html += "<button class=\"btn\" onclick=\"updateAutoSettings()\">Zapisz ustawienia</button>";
+        html += "</div>";
+
+        // Default Speed Setting (before webhook)
+        html += "<div class=\"card\">";
+        html += "<div class=\"setting-row\">";
+        html += "<h3>Domyślny bieg:</h3>";
+        html += "<input type=\"number\" id=\"defaultInput\" min=\"1\" max=\"4\" value=\"" + String(defaultSpeed) + "\">";
+        html += "<button class=\"btn\" onclick=\"setDefault()\">Ustaw</button>";
+        html += "</div>";
+        html += "</div>";
+
+        // 8. Webhook
+        html += "<div class=\"card\">";
+        html += "<h3>Webhook URL:</h3>";
+        html += "<div class=\"setting-row\">";
         html += "<input type=\"text\" id=\"webhookUrl\" placeholder=\"Podaj adres webhooka\" value=\"" + webhookUrl + "\">";
-        html += "<button type=\"button\" onclick=\"setWebhook()\">Zapisz</button>";
-        html += "</form>";
-        html += "<h3>Automatyka:</h3>";
-        html += "<div style='text-align: left; padding: 10px;'>";
-        html += "<label>Włączona: <input type='checkbox' id='autoActivation' " + String(autoActivationEnabled ? "checked" : "") + " onchange='updateAutoSettings()'></label><br>";
-        html += "<label>Próg temperatury (°C/min): <input type='number' id='tempThreshold' value='" + String(tempRiseThreshold) + "' step='0.1' min='0.1' max='10' style='width:100px'></label><br>";
-        html += "<label>Próg wilgotności (%/min): <input type='number' id='humThreshold' value='" + String(humRiseThreshold) + "' step='0.1' min='0.1' max='20' style='width:100px'></label><br>";
-        html += "<label>Interwał sprawdzania (s): <input type='number' id='checkInterval' value='" + String(monitoringInterval/1000) + "' min='1' max='60' style='width:100px'></label><br>";
-        html += "<button onclick='updateAutoSettings()'>Zapisz ustawienia</button>";
+        html += "<button class=\"btn\" onclick=\"setWebhook()\">Zapisz</button>";
         html += "</div>";
         html += "</div>";
+
+        html += "</div>"; // Close container
+
+        // Keep existing JavaScript
         html += "<script>";
         html += "const ws = new WebSocket('ws://' + location.host + '/ws');";
         html += "ws.onmessage = function(event) {";
         html += "  const data = JSON.parse(event.data);";
-        html += "  document.getElementById('currentSpeed').innerText = data.currentSpeed;";
+        html += "  document.getElementById('currentSpeed').innerText = data.currentSpeed === 0 ? 'OFF' : data.currentSpeed;";
+        html += "  const bars = document.querySelectorAll('.speed-bar');";
+        html += "  bars.forEach((bar, index) => {";
+        html += "    bar.classList.toggle('active', data.currentSpeed > index);";
+        html += "  });";
         html += "  document.getElementById('temperature').innerText = data.temperature.toFixed(1) + ' °C';";
         html += "  document.getElementById('humidity').innerText = data.humidity.toFixed(1) + ' %';";
         html += "  document.getElementById('gestureControl').checked = data.gestureControlEnabled;";

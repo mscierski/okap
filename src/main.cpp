@@ -110,6 +110,13 @@ void setup() {
         Serial.println("Błąd inicjalizacji BME280!");
         while (1);
     }
+
+    // Take initial readings to prevent false triggers on boot
+    temperature = bme.readTemperature();
+    humidity = bme.readHumidity();
+    lastTemperature = temperature;
+    lastHumidity = humidity;
+    lastMonitoringTime = millis();
 }
 
 void loop() {
