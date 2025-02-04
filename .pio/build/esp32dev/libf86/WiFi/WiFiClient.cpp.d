@@ -85,6 +85,7 @@
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/log/include/esp_log_internal.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-matrix.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-uart.h \
+ C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/hal/include/hal/uart_types.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-gpio.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/variants/esp32/pins_arduino.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-touch.h \
@@ -123,6 +124,7 @@
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/IPAddress.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/HardwareSerial.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/HWCDC.h \
+ C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/USBCDC.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/Esp.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/spi_flash/include/esp_partition.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/spi_flash/include/esp_flash.h \
@@ -131,6 +133,8 @@
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/spi_flash/include/esp_spi_flash.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/spi_flash/include/esp_spi_flash_counters.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_hw_support/include/soc/esp32/spiram.h \
+ C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/io_pin_remap.h \
+ C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/Arduino.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/Client.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src/WiFi.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/Print.h \
@@ -176,6 +180,7 @@
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/lwip/lwip/src/include/lwip/def.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/lwip/lwip/src/include/lwip/ip6_zone.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/lwip/include/apps/dhcpserver/dhcpserver.h \
+ C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/lwip/lwip/src/include/lwip/err.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_netif/include/esp_netif_sta_list.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_wifi/include/esp_smartconfig.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/wifi_provisioning/include/wifi_provisioning/manager.h \
@@ -192,7 +197,6 @@
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/lwip/lwip/src/include/lwip/sockets.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/newlib/platform_include/sys/poll.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/lwip/lwip/src/include/lwip/netif.h \
- C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/lwip/lwip/src/include/lwip/err.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/lwip/lwip/src/include/lwip/pbuf.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/lwip/lwip/src/include/lwip/stats.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/lwip/lwip/src/include/lwip/mem.h \

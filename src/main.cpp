@@ -5,12 +5,20 @@
 #include "relays.h"
 #include "gesture.h"
 #include <ArduinoOTA.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BME280.h>
+
 // Definicje zmiennych globalnych
 int currentSpeed = 0;     // Domyślnie wentylator wyłączony
 int defaultSpeed = 1;     // Domyślny bieg wentylatora
 String webhookUrl = "";   // URL webhooka, domyślnie pusty
 
 unsigned long lastRelayLogTime = 0; // Zmienna do śledzenia czasu dla logowania
+float temperature = 0.0;
+float humidity = 0.0;
+bool gestureControlEnabled = true;
+
+unsigned long lastSensorUpdateTime = 0;
 
 // Konfiguracja Ethernetu dla WT32-ETH01
 #define ETH_CLK_MODE    ETH_CLOCK_GPIO0_IN
@@ -91,12 +99,17 @@ void setup() {
 
     // Inicjalizacja magistrali I2C i VL53L0X
     Wire.begin(SDA_PIN, SCL_PIN);
-Wire.setClock(100000); // Zegar I2C 100 kHz
+    Wire.setClock(100000); // Zegar I2C 100 kHz
 
     setupGesture();
 
     // Inicjalizacja serwera Web GUI i API
     setupWebServer();
+
+    if (!bme.begin(0x76)) {
+        Serial.println("Błąd inicjalizacji BME280!");
+        while (1);
+    }
 }
 
 void loop() {
@@ -105,13 +118,19 @@ void loop() {
         Serial.println("Ethernet rozłączony!");
     }
     
- ArduinoOTA.handle();
+    ArduinoOTA.handle();
     // Logowanie stanu przekaźników co sekundę
     //if (millis() - lastRelayLogTime >= 1000) {
     //    logRelayStates();
-     //   lastRelayLogTime = millis();
+    //    lastRelayLogTime = millis();
     //}
 
-    // Obsługa gestów
-    processGesture();
+    if (millis() - lastSensorUpdateTime >= 1000) {
+        updateSensorData();
+        lastSensorUpdateTime = millis();
+    }
+
+    if (gestureControlEnabled) {
+        processGesture();
+    }
 }

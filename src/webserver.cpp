@@ -2,12 +2,18 @@
 #include <ArduinoJson.h>
 #include <HTTPClient.h>
 #include <Preferences.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BME280.h>
 #include "webserver.h"
 #include "relays.h"
 #include "config.h"
+#include "gesture.h"
 
 extern int currentSpeed;
 extern int defaultSpeed;
+extern float temperature;
+extern float humidity;
+extern bool gestureControlEnabled;
 
 Preferences preferences;
 AsyncWebServer server(80);
@@ -15,8 +21,13 @@ AsyncWebSocket ws("/ws");
 
 // Funkcja do powiadamiania klientów przez WebSocket
 void notifyClients() {
-    StaticJsonDocument<200> jsonResponse;
+    StaticJsonDocument<256> jsonResponse;
     jsonResponse["currentSpeed"] = currentSpeed;
+    jsonResponse["temperature"] = temperature;
+    jsonResponse["humidity"] = humidity;
+    jsonResponse["gestureControlEnabled"] = gestureControlEnabled;
+    jsonResponse["gestureDetected"] = gestureDetected;
+    jsonResponse["holdDetected"] = holdDetected;
     String response;
     serializeJson(jsonResponse, response);
     ws.textAll(response);
@@ -57,14 +68,26 @@ void sendWebhookRequest(int speed) {
     http.end();
 }
 
+void updateSensorData() {
+    temperature = bme.readTemperature();
+    humidity = bme.readHumidity();
+    notifyClients();
+}
+
 void setupWebServer() {
     preferences.begin("okap", false);
 
     // Wczytanie konfiguracji z pamięci
     webhookUrl = preferences.getString("webhook", "");
     defaultSpeed = preferences.getInt("defaultSpeed", 1);
+    gestureControlEnabled = preferences.getBool("gestureEnabled", true);  // Add this line
     Serial.println("Załadowano adres webhooka: " + webhookUrl);
     Serial.printf("Załadowano domyślny bieg: %d\n", defaultSpeed);
+
+    if (!bme.begin(0x76)) {
+        Serial.println("Błąd inicjalizacji BME280!");
+        while (1);
+    }
 
     // Główna strona HTML
     server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
@@ -88,6 +111,9 @@ void setupWebServer() {
         html += "<div id=\"container\">";
         html += "<h1>OKAP</h1>";
         html += "<h3>Aktualny bieg: <span id=\"currentSpeed\">" + String(currentSpeed) + "</span></h3>";
+        html += "<h3>Temperatura: <span id=\"temperature\">" + String(temperature, 1) + " °C</span></h3>";
+        html += "<h3>Wilgotność: <span id=\"humidity\">" + String(humidity, 1) + " %</span></h3>";
+        html += "<h3>Gesty: <input type=\"checkbox\" id=\"gestureControl\" " + String(gestureControlEnabled ? "checked" : "") + " onchange=\"toggleGestureControl()\"></h3>";
         html += "<form id=\"defaultForm\">";
         html += "<h3>Ustaw domyślny bieg:</h3>";
         html += "<input type=\"number\" id=\"defaultInput\" min=\"0\" max=\"4\" value=\"" + String(defaultSpeed) + "\">";
@@ -110,6 +136,9 @@ void setupWebServer() {
         html += "ws.onmessage = function(event) {";
         html += "  const data = JSON.parse(event.data);";
         html += "  document.getElementById('currentSpeed').innerText = data.currentSpeed;";
+        html += "  document.getElementById('temperature').innerText = data.temperature.toFixed(1) + ' °C';";
+        html += "  document.getElementById('humidity').innerText = data.humidity.toFixed(1) + ' %';";
+        html += "  document.getElementById('gestureControl').checked = data.gestureControlEnabled;";
         html += "};";
         html += "function setSpeed(speed) {";
         html += "  fetch('/state', {";
@@ -134,6 +163,14 @@ void setupWebServer() {
         html += "    body: JSON.stringify({ url: url })";
         html += "  });";
         html += "}";
+        html += "function toggleGestureControl() {";
+        html += "  const enabled = document.getElementById('gestureControl').checked;";
+        html += "  fetch('/gesture', {";
+        html += "    method: 'POST',";
+        html += "    headers: { 'Content-Type': 'application/json' },";
+        html += "    body: JSON.stringify({ enabled: enabled })";
+        html += "  });";
+        html += "}";
         html += "</script>";
         html += "</body>";
         html += "</html>";
@@ -142,7 +179,7 @@ void setupWebServer() {
 
     server.on("/state", HTTP_POST, [](AsyncWebServerRequest *request) {}, nullptr, [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
         String body = String((char *)data).substring(0, len);
-        StaticJsonDocument<200> doc;
+        DynamicJsonDocument doc(static_cast<size_t>(200));
         deserializeJson(doc, body);
         int speed = doc["speed"];
         setFanSpeed(speed);
@@ -155,7 +192,7 @@ void setupWebServer() {
     // Obsługa ustawiania domyślnego biegu
     server.on("/default", HTTP_POST, [](AsyncWebServerRequest *request) {}, nullptr, [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
         String body = String((char *)data).substring(0, len);
-        StaticJsonDocument<200> doc;
+        DynamicJsonDocument doc(static_cast<size_t>(200));
         deserializeJson(doc, body);
         int speed = doc["default"];
         if (speed < 0 || speed > 4) {
@@ -165,6 +202,16 @@ void setupWebServer() {
         defaultSpeed = speed;
         preferences.putInt("defaultSpeed", defaultSpeed); // Zapisanie w pamięci
         Serial.printf("Ustawiono domyślny bieg na: %d\n", defaultSpeed);
+        request->send(200);
+    });
+
+    server.on("/gesture", HTTP_POST, [](AsyncWebServerRequest *request) {}, nullptr, [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
+        String body = String((char *)data).substring(0, len);
+        DynamicJsonDocument doc(static_cast<size_t>(200));
+        deserializeJson(doc, body);
+        gestureControlEnabled = doc["enabled"];
+        preferences.putBool("gestureEnabled", gestureControlEnabled);  // Add this line
+        notifyClients();  // Add this line
         request->send(200);
     });
 

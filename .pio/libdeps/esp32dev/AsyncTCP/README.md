@@ -6,17 +6,17 @@
 [![Continuous Integration](https://github.com/ESP32Async/AsyncTCP/actions/workflows/ci.yml/badge.svg)](https://github.com/ESP32Async/AsyncTCP/actions/workflows/ci.yml)
 [![PlatformIO Registry](https://badges.registry.platformio.org/packages/ESP32Async/library/AsyncTCP.svg)](https://registry.platformio.org/libraries/ESP32Async/AsyncTCP)
 
-Project moved to [ESP32Async](https://github.com/organizations/ESP32Async) organization at [https://github.com/ESP32Async/AsyncTCP](https://github.com/ESP32Async/AsyncTCP)
+Project moved to [ESP32Async](https://github.com/ESP32Async) organization at [https://github.com/ESP32Async/AsyncTCP](https://github.com/ESP32Async/AsyncTCP)
 
 Discord Server: [https://discord.gg/X7zpGdyUcY](https://discord.gg/X7zpGdyUcY)
 
 Please see the new links:
 
-- `ESP32Async/ESPAsyncWebServer @ 3.6.0` (ESP32, ESP8266, RP2040)
-- `ESP32Async/AsyncTCP @ 3.3.2` (ESP32)
-- `ESP32Async/ESPAsyncTCP @ 2.0.0` (ESP8266)
+- `ESP32Async/ESPAsyncWebServer` (ESP32, ESP8266, RP2040)
+- `ESP32Async/AsyncTCP` (ESP32)
+- `ESP32Async/ESPAsyncTCP` (ESP8266)
 - `https://github.com/ESP32Async/AsyncTCPSock/archive/refs/tags/v1.0.3-dev.zip` (AsyncTCP alternative for ESP32)
-- `khoih-prog/AsyncTCP_RP2040W @ 1.2.0` (RP2040)
+- `khoih-prog/AsyncTCP_RP2040W` (RP2040)
 
 ### Async TCP Library for ESP32 Arduino
 
@@ -49,12 +49,6 @@ The base classes on which everything else is built. They expose all possible sce
 - Reduce logging of non critical messages
 - Use IPADDR6_INIT() macro to set connecting IPv6 address
 - xTaskCreateUniversal function
-
-## Coordinates
-
-```
-ESP32Async/AsyncTCP @ ^3.3.2
-```
 
 ## Important recommendations
 

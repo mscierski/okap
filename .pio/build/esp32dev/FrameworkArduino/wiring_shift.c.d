@@ -82,6 +82,7 @@
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/log/include/esp_log_internal.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-matrix.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-uart.h \
+ C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/hal/include/hal/uart_types.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-gpio.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/variants/esp32/pins_arduino.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-touch.h \
@@ -106,4 +107,5 @@
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp_arduino_version.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp8266-compat.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/stdlib_noniso.h \
- C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/binary.h
+ C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/binary.h \
+ C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/io_pin_remap.h

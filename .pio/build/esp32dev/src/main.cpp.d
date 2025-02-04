@@ -1,5 +1,6 @@
 .pio/build/esp32dev/src/main.cpp.o: src/main.cpp \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/libraries/Ethernet/src/ETH.h \
+ C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/dio_qspi/include/sdkconfig.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src/WiFi.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/Print.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/WString.h \
@@ -117,6 +118,7 @@
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/lwip/lwip/src/include/lwip/def.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/lwip/lwip/src/include/lwip/ip6_zone.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/lwip/include/apps/dhcpserver/dhcpserver.h \
+ C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/lwip/lwip/src/include/lwip/err.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_netif/include/esp_netif_sta_list.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_wifi/include/esp_smartconfig.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/wifi_provisioning/include/wifi_provisioning/manager.h \
@@ -144,6 +146,7 @@
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/log/include/esp_log_internal.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-matrix.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-uart.h \
+ C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/hal/include/hal/uart_types.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-gpio.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/variants/esp32/pins_arduino.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-touch.h \
@@ -176,6 +179,7 @@
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/Stream.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/HardwareSerial.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/HWCDC.h \
+ C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/USBCDC.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/Esp.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/spi_flash/include/esp_partition.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/spi_flash/include/esp_flash.h \
@@ -184,6 +188,8 @@
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/spi_flash/include/esp_spi_flash.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/spi_flash/include/esp_spi_flash_counters.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_hw_support/include/soc/esp32/spiram.h \
+ C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/io_pin_remap.h \
+ C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/Arduino.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/Client.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src/WiFiServer.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/Server.h \
@@ -192,7 +198,14 @@
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/cbuf.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/libraries/Wire/src/Wire.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal.h \
- include/config.h include/webserver.h include/relays.h include/gesture.h \
+ include/config.h \
+ .pio/libdeps/esp32dev/Adafruit\ BME280\ Library/Adafruit_BME280.h \
+ .pio/libdeps/esp32dev/Adafruit\ BusIO@src-1c59a2908cd7e8f991f92381d560d371/Adafruit_I2CDevice.h \
+ .pio/libdeps/esp32dev/Adafruit\ BusIO@src-1c59a2908cd7e8f991f92381d560d371/Adafruit_SPIDevice.h \
+ C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/libraries/SPI/src/SPI.h \
+ C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-spi.h \
+ .pio/libdeps/esp32dev/Adafruit\ Unified\ Sensor@src-b66dc39c11b28c567c715313bb4d4d54/Adafruit_Sensor.h \
+ include/webserver.h include/relays.h include/gesture.h \
  .pio/libdeps/esp32dev/Adafruit_VL53L0X/src/Adafruit_VL53L0X.h \
  .pio/libdeps/esp32dev/Adafruit_VL53L0X/src/vl53l0x_api.h \
  .pio/libdeps/esp32dev/Adafruit_VL53L0X/src/vl53l0x_api_strings.h \

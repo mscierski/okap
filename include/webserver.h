@@ -7,9 +7,13 @@
 extern int currentSpeed;
 extern int defaultSpeed;
 extern String webhookUrl;
+extern float temperature;
+extern float humidity;
+extern bool gestureControlEnabled;
 
 // Funkcje do obsługi serwera WWW
 void setupWebServer();
 void sendWebhookRequest(int speed);
 void notifyClients();
+void updateSensorData();
 #endif

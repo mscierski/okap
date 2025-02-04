@@ -1,6 +1,8 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include <Adafruit_BME280.h> // Include the Adafruit_BME280 header
+
 // GPIO Pins for relays
 #define RELAY_PIN1 5
 #define RELAY_PIN2 32
@@ -13,9 +15,10 @@
 #define SDA_PIN 14
 #define SCL_PIN 15
 
-
 // Deklaracje globalnych zmiennych
 extern int currentSpeed;
 extern int defaultSpeed;
 extern String webhookUrl; // Deklaracja zmiennej webhookUrl jako extern
+extern Adafruit_BME280 bme; // Deklaracja zmiennej bme jako extern
+
 #endif

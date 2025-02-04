@@ -84,6 +84,7 @@
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/log/include/esp_log_internal.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-matrix.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-uart.h \
+ C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/hal/include/hal/uart_types.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-gpio.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/variants/esp32/pins_arduino.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-touch.h \
@@ -122,6 +123,7 @@
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/IPAddress.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/HardwareSerial.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/HWCDC.h \
+ C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/USBCDC.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/Esp.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/spi_flash/include/esp_partition.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/spi_flash/include/esp_flash.h \
@@ -130,6 +132,8 @@
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/spi_flash/include/esp_spi_flash.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/spi_flash/include/esp_spi_flash_counters.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_hw_support/include/soc/esp32/spiram.h \
+ C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/io_pin_remap.h \
+ C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/Arduino.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/libraries/FS/src/FS.h \
  .pio/libdeps/esp32dev/AsyncTCP@src-7fb2940bccb78b8d2de6915ae328b7fc/src/AsyncTCP.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/IPv6Address.h \
@@ -244,4 +248,21 @@
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/hal/include/hal/aes_types.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/mbedtls/mbedtls/include/mbedtls/error.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/libraries/Preferences/src/Preferences.h \
- include/webserver.h include/relays.h include/config.h
+ .pio/libdeps/esp32dev/Adafruit\ Unified\ Sensor@src-b66dc39c11b28c567c715313bb4d4d54/Adafruit_Sensor.h \
+ .pio/libdeps/esp32dev/Adafruit\ BME280\ Library/Adafruit_BME280.h \
+ .pio/libdeps/esp32dev/Adafruit\ BusIO@src-1c59a2908cd7e8f991f92381d560d371/Adafruit_I2CDevice.h \
+ C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/libraries/Wire/src/Wire.h \
+ C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal.h \
+ .pio/libdeps/esp32dev/Adafruit\ BusIO@src-1c59a2908cd7e8f991f92381d560d371/Adafruit_SPIDevice.h \
+ C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/libraries/SPI/src/SPI.h \
+ C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-spi.h \
+ include/webserver.h include/relays.h include/config.h include/gesture.h \
+ .pio/libdeps/esp32dev/Adafruit_VL53L0X/src/Adafruit_VL53L0X.h \
+ .pio/libdeps/esp32dev/Adafruit_VL53L0X/src/vl53l0x_api.h \
+ .pio/libdeps/esp32dev/Adafruit_VL53L0X/src/vl53l0x_api_strings.h \
+ .pio/libdeps/esp32dev/Adafruit_VL53L0X/src/vl53l0x_def.h \
+ .pio/libdeps/esp32dev/Adafruit_VL53L0X/src/vl53l0x_device.h \
+ .pio/libdeps/esp32dev/Adafruit_VL53L0X/src/vl53l0x_types.h \
+ .pio/libdeps/esp32dev/Adafruit_VL53L0X/src/vl53l0x_platform.h \
+ .pio/libdeps/esp32dev/Adafruit_VL53L0X/src/vl53l0x_i2c_platform.h \
+ .pio/libdeps/esp32dev/Adafruit_VL53L0X/src/vl53l0x_platform_log.h

@@ -1,4 +1,7 @@
-https://github.com/me-no-dev/ESPAsyncWebServer.git
-https://github.com/adafruit/Adafruit_VL53L0X.git
 https://github.com/me-no-dev/AsyncTCP.git
-bblanchon/ArduinoJson @ ^6.21.2
+https://github.com/adafruit/Adafruit_BusIO.git
+https://github.com/adafruit/Adafruit_Sensor.git
+https://github.com/adafruit/Adafruit_VL53L0X.git
+https://github.com/adafruit/Adafruit_BME280_Library.git
+https://github.com/me-no-dev/ESPAsyncWebServer.git
+https://github.com/bblanchon/ArduinoJson.git

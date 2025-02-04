@@ -84,6 +84,7 @@
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/log/include/esp_log_internal.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-matrix.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-uart.h \
+ C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/hal/include/hal/uart_types.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-gpio.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/variants/esp32/pins_arduino.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-touch.h \
@@ -122,6 +123,7 @@
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/IPAddress.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/HardwareSerial.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/HWCDC.h \
+ C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/USBCDC.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/Esp.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/spi_flash/include/esp_partition.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/spi_flash/include/esp_flash.h \
@@ -130,5 +132,7 @@
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/spi_flash/include/esp_spi_flash.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/spi_flash/include/esp_spi_flash_counters.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_hw_support/include/soc/esp32/spiram.h \
+ C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/io_pin_remap.h \
+ C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/Arduino.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/IPv6Address.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/Print.h
