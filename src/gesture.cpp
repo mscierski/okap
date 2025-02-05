@@ -12,6 +12,9 @@ bool holdDetected = false;
 const int gestureThreshold = 200;  // Czas (ms) na wykrycie machnięcia ręką
 const int holdThreshold = 1000;    // Czas (ms) na wykrycie przytrzymania ręki
 
+// Add global variable
+int currentDistance = 0;
+
 void setupGesture() {
     if (!lox.begin()) {
         Serial.println("Błąd inicjalizacji VL53L0X! Sprawdź połączenia.");
@@ -21,57 +24,66 @@ void setupGesture() {
 }
 
 void processGesture() {
-    static unsigned long presenceStartTime = 0; // Czas początku obecności ręki w zasięgu
-    static unsigned long lastStepTime = 0;     // Czas ostatniej zmiany biegu przy przytrzymaniu
-    static int lastValidDistance = 0;          // Ostatnia poprawna odległość
+    static unsigned long presenceStartTime = 0;
+    static unsigned long lastStepTime = 0;
+    static int lastValidDistance = 0;
 
     VL53L0X_RangingMeasurementData_t measure;
     lox.rangingTest(&measure, false);
 
-    if (measure.RangeStatus != 4) { // 4 = brak danych
-        int distance = measure.RangeMilliMeter;
+    if (measure.RangeStatus != 4) {
+        currentDistance = measure.RangeMilliMeter;
 
-        if (distance >= 50 && distance <= 2000) { // Zakres odczytów
-           // Serial.print("Odległość: ");
-            //Serial.print(distance);
-            //Serial.println(" mm");
+        // Only process gestures when distance is within valid range (50-200mm)
+        if (currentDistance >= 50 && currentDistance <= 200) {
+            if (presenceStartTime == 0) {
+                presenceStartTime = millis();
+                lastStepTime = millis();
+            }
 
-            if (distance <= 200) { // Ręka w odległości 0–20 cm
-                if (presenceStartTime == 0) {
-                    presenceStartTime = millis(); // Zaczynamy liczyć czas obecności ręki
-                    lastStepTime = millis();      // Inicjujemy licznik do zmiany biegów
-                }
-
-                // Sprawdź, czy trzymamy rękę wystarczająco długo na przytrzymanie
-                if (millis() - presenceStartTime > 3000) { // 3 sekundy przytrzymania
-                    if (millis() - lastStepTime >= 3000) { // Zwiększamy bieg co kolejne 3 sekundy
-                        Serial.println("Wykryto przytrzymanie ręki - zwiększanie biegu!");
-                        currentSpeed = (currentSpeed + 1) % 5; // Biegi: 0–4, zapętlenie
-                        setFanSpeed(currentSpeed);
-                        lastStepTime = millis(); // Aktualizuj czas ostatniej zmiany biegu
-                        sendWebhookRequest(currentSpeed);
-                        notifyClients();
-                    }
-                }
-            } else {
-                // Jeśli ręka opuściła zasięg przed upływem 3 sekund → "kliknięcie"
-                if (presenceStartTime > 0 && millis() - presenceStartTime <= 3000) {
-                    Serial.println("Wykryto kliknięcie - ON/OFF!");
-                    // Przełącz pomiędzy OFF a biegiem domyślnym
-                    currentSpeed = (currentSpeed == 0) ? defaultSpeed : 0;
+            // Hold gesture detection
+            if (millis() - presenceStartTime > 3000) {
+                if (millis() - lastStepTime >= 3000) {
+                    Serial.println("Wykryto przytrzymanie ręki - zwiększanie biegu!");
+                    int newSpeed = (currentSpeed + 1) % 5;
+                    String details = "Hand hold - changing speed (distance: " + String(currentDistance) + "mm)";
+                    logGestureEvent(currentSpeed, newSpeed, details);
+                    currentSpeed = newSpeed;
                     setFanSpeed(currentSpeed);
+                    lastStepTime = millis();
                     sendWebhookRequest(currentSpeed);
                     notifyClients();
                 }
-
-                // Reset flag
-                presenceStartTime = 0;
-                holdDetected = false;
             }
-
-            lastValidDistance = distance; // Aktualizuj ostatnią poprawną odległość
+        } else {
+            // Hand moved away - check if it was a quick gesture
+            if (presenceStartTime > 0 && millis() - presenceStartTime <= 3000) {
+                Serial.println("Wykryto kliknięcie - ON/OFF!");
+                currentSpeed = (currentSpeed == 0) ? defaultSpeed : 0;
+                String details = "Hand gesture - " + 
+                       String(currentSpeed == 0 ? "turning off" : "turning on") +
+                       " (distance: " + String(currentDistance) + "mm)";
+                
+                if (currentSpeed == 0) {
+                    logGestureEvent(defaultSpeed, 0, details);
+                } else {
+                    logGestureEvent(0, defaultSpeed, details);
+                }
+                
+                setFanSpeed(currentSpeed);
+                sendWebhookRequest(currentSpeed);
+                notifyClients();
+            }
+            
+            // Reset when hand is away
+            presenceStartTime = 0;
+            holdDetected = false;
         }
+
+        lastValidDistance = currentDistance;
+    } else {
+        currentDistance = -1;
     }
 
-    delay(50); // Krótkie opóźnienie dla stabilności pętli
+    delay(50);
 }

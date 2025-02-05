@@ -1,4 +1,4 @@
-.pio/build/esp32dev/src/config.cpp.o: src/config.cpp \
+.pio/build/esp32dev/src/config.cpp.o: src/config.cpp include/config.h \
  .pio/libdeps/esp32dev/Adafruit\ BME280\ Library/Adafruit_BME280.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/Arduino.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp_arduino_version.h \

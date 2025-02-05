@@ -4,10 +4,10 @@
 #include <Preferences.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
-#include <ETH.h>  // Add ETH header
+#include <ETH.h>
 #include "webserver.h"
 #include "relays.h"
-#include "config.h"
+#include "config.h"  // This already includes LogEntry struct
 #include "gesture.h"
 
 extern int currentSpeed;
@@ -19,6 +19,24 @@ extern bool gestureControlEnabled;
 Preferences preferences;
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
+
+static const size_t MAX_LOGS = 100;
+
+// Add the logging function
+void addLog(const String& cause, int fromSpeed, int toSpeed, const String& details) {
+    if (speedLogs.size() >= MAX_LOG_ENTRIES) {
+        speedLogs.erase(speedLogs.begin());
+    }
+    
+    LogEntry entry;
+    entry.timestamp = time(nullptr);
+    entry.cause = cause;
+    entry.fromSpeed = fromSpeed;
+    entry.toSpeed = toSpeed;
+    entry.details = details;
+    
+    speedLogs.push_back(entry);
+}
 
 // Funkcja do powiadamiania klientów przez WebSocket
 void notifyClients() {
@@ -33,6 +51,7 @@ void notifyClients() {
     jsonResponse["humRiseThreshold"] = humRiseThreshold;
     jsonResponse["monitoringInterval"] = monitoringInterval;
     jsonResponse["autoActivationEnabled"] = autoActivationEnabled;
+    jsonResponse["distance"] = currentDistance;  // Add distance to websocket data
     String response;
     serializeJson(jsonResponse, response);
     ws.textAll(response);
@@ -106,6 +125,21 @@ void updateSensorData() {
             currentSpeed = defaultSpeed;
             setFanSpeed(currentSpeed);
             sendWebhookRequest(currentSpeed);
+        }
+
+        // Log significant changes even if fan is already on
+        if (tempChangeRate >= tempRiseThreshold || humChangeRate >= humRiseThreshold) {
+            String details = "Temp: " + String(tempChangeRate, 1) + "°C/min, Hum: " + String(humChangeRate, 1) + "%/min";
+            
+            if (currentSpeed == 0) {
+                // Fan was off, turning on
+                currentSpeed = defaultSpeed;
+                setFanSpeed(currentSpeed);
+                addLog("AUTO", 0, currentSpeed, details);
+            } else {
+                // Fan already running, just log the event
+                addLog("DETECT", currentSpeed, currentSpeed, details);
+            }
         }
 
         lastTemperature = newTemperature;
@@ -244,6 +278,15 @@ void setupWebServer() {
         html += "</div>";
         html += "</div>";
 
+        // Add distance sensor card
+        html += "<div class=\"card\">";
+        html += "<div class=\"setting-row\">";
+        html += "<h3>Distance Sensor:</h3>";
+        html += "<span class=\"sensor-value\" id=\"distance\">--</span>";
+        html += "<span class=\"unit\">mm</span>";
+        html += "</div>";
+        html += "</div>";
+
         // 6. Automation Control and 7. Settings
         html += "<div class=\"card\">";
         html += "<div class=\"setting-row\">";
@@ -336,6 +379,7 @@ void setupWebServer() {
         html += "  document.getElementById('temperature').innerText = data.temperature.toFixed(1) + ' °C';";
         html += "  document.getElementById('humidity').innerText = data.humidity.toFixed(1) + ' %';";
         html += "  document.getElementById('gestureControl').checked = data.gestureControlEnabled;";
+        html += "  document.getElementById('distance').innerText = data.distance >= 0 ? data.distance : '--';";
         html += "};";
         html += "function setSpeed(speed) {";
         html += "  fetch('/state', {";
@@ -419,6 +463,7 @@ void setupWebServer() {
         StaticJsonDocument<200> doc;  // Use StaticJsonDocument
         deserializeJson(doc, body);
         int speed = doc["speed"];
+        addLog("API", currentSpeed, speed);
         setFanSpeed(speed);
         currentSpeed = speed;
         sendWebhookRequest(currentSpeed);
@@ -521,7 +566,73 @@ void setupWebServer() {
             ESP.restart();
     });
 
+    // Add logs endpoint
+    server.on("/logs", HTTP_GET, [](AsyncWebServerRequest *request) {
+        String html = "<!DOCTYPE html><html><head>";
+        html += "<meta charset='UTF-8'>";
+        html += "<meta name='viewport' content='width=device-width, initial-scale=1'>";
+        html += "<title>Okap - Logs</title>";
+        html += "<style>";
+        html += "body { font-family: 'Roboto', sans-serif; background: #121212; color: #fff; margin: 20px; }";
+        html += "table { width: 100%; border-collapse: collapse; margin-top: 20px; }";
+        html += "th, td { padding: 12px; text-align: left; border-bottom: 1px solid #303030; }";
+        html += "th { background: #1e1e1e; }";
+        html += "tr:hover { background: #1e1e1e; }";
+        html += ".container { max-width: 1200px; margin: 0 auto; }";
+        html += ".clear-btn { background: #d32f2f; color: white; padding: 12px 24px; border: none; ";
+        html += "border-radius: 4px; cursor: pointer; margin-bottom: 20px; }";
+        html += ".clear-btn:hover { background: #b71c1c; }";
+        html += "</style></head><body><div class='container'>";
+        html += "<h1>Event Log</h1>";
+        html += "<button class='clear-btn' onclick='clearLogs()'>Clear Logs</button>";
+        html += "<table><thead><tr>";
+        html += "<th>Date/Time</th><th>Cause</th><th>From</th><th>To</th><th>Details</th>";
+        html += "</tr></thead><tbody>";
+
+        for (auto it = speedLogs.rbegin(); it != speedLogs.rend(); ++it) {
+            struct tm timeinfo;
+            localtime_r(&it->timestamp, &timeinfo);
+            char timeStr[64];
+            strftime(timeStr, sizeof(timeStr), "%Y-%m-%d %H:%M:%S", &timeinfo);
+
+            html += "<tr>";
+            html += "<td>" + String(timeStr) + "</td>";
+            html += "<td>" + it->cause + "</td>";
+            html += "<td>" + String(it->fromSpeed == 0 ? "OFF" : String(it->fromSpeed)) + "</td>";
+            html += "<td>" + String(it->toSpeed == 0 ? "OFF" : String(it->toSpeed)) + "</td>";
+            html += "<td>" + it->details + "</td>";
+            html += "</tr>";
+        }
+
+        html += "</tbody></table>";
+        html += "<script>";
+        html += "function clearLogs() {";
+        html += "  if (confirm('Are you sure you want to clear all logs?')) {";
+        html += "    fetch('/clearlogs', {method: 'POST'})";
+        html += "      .then(response => {";
+        html += "        if (response.ok) {";
+        html += "          window.location.reload();";
+        html += "        }";
+        html += "      });";
+        html += "  }";
+        html += "}";
+        html += "</script>";
+        html += "</div></body></html>";
+        request->send(200, "text/html", html);
+    });
+
+    // Add clear logs endpoint
+    server.on("/clearlogs", HTTP_POST, [](AsyncWebServerRequest *request) {
+        speedLogs.clear();
+        request->send(200);
+    });
+
     ws.onEvent(onWebSocketEvent);
     server.addHandler(&ws);
     server.begin();
+}
+
+// Update gesture handling code to include logging
+void logGestureEvent(int oldSpeed, int newSpeed, const String& details) {
+    addLog("GESTURE", oldSpeed, newSpeed, details);
 }

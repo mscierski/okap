@@ -18,4 +18,9 @@ void setupWebServer();
 void sendWebhookRequest(int speed);
 void notifyClients();
 void updateSensorData();
+void logGestureEvent(int oldSpeed, int newSpeed, const String& details);
+
+// Keep the default argument in the declaration
+void addLog(const String& cause, int fromSpeed, int toSpeed, const String& details = "");
+
 #endif

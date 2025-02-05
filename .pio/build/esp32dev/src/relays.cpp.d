@@ -133,7 +133,7 @@
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/esp_hw_support/include/soc/esp32/spiram.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/io_pin_remap.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/Arduino.h \
- include/config.h \
+ include/relays.h include/config.h \
  .pio/libdeps/esp32dev/Adafruit\ BME280\ Library/Adafruit_BME280.h \
  .pio/libdeps/esp32dev/Adafruit\ BusIO@src-1c59a2908cd7e8f991f92381d560d371/Adafruit_I2CDevice.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/libraries/Wire/src/Wire.h \
@@ -142,4 +142,6 @@
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/libraries/SPI/src/SPI.h \
  C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/esp32-hal-spi.h \
  .pio/libdeps/esp32dev/Adafruit\ Unified\ Sensor@src-b66dc39c11b28c567c715313bb4d4d54/Adafruit_Sensor.h \
- C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/Print.h
+ C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/cores/esp32/Print.h \
+ include/webserver.h \
+ C:/Users/mscie/.platformio/packages/framework-arduinoespressif32/libraries/Preferences/src/Preferences.h

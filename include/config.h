@@ -1,7 +1,8 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#include <Adafruit_BME280.h> // Include the Adafruit_BME280 header
+#include <vector>
+#include <Adafruit_BME280.h>
 
 // GPIO Pins for relays
 #define RELAY_PIN1 5
@@ -26,6 +27,19 @@
 #define DEFAULT_TEMP_THRESHOLD 1.0f
 #define DEFAULT_HUM_THRESHOLD 3.0f
 #define DEFAULT_CHECK_INTERVAL 10000
+
+// Log settings
+#define MAX_LOG_ENTRIES 50  // Maximum number of log entries to keep
+
+struct LogEntry {
+    time_t timestamp;
+    String cause;
+    int fromSpeed;
+    int toSpeed;
+    String details;
+};
+
+extern std::vector<LogEntry> speedLogs;
 
 // Deklaracje globalnych zmiennych
 extern int currentSpeed;

@@ -1,5 +1,7 @@
 #include <Arduino.h>
+#include "relays.h"
 #include "config.h"
+#include "webserver.h"  // Add this include
 
 void setupRelays() {
     // Konfiguracja pinów przekaźników jako wyjścia
@@ -42,4 +44,7 @@ void setFanSpeed(int speed) {
             digitalWrite(RELAY_PIN3, LOW);
             break;
     }
+    int oldSpeed = currentSpeed;
+    currentSpeed = speed;
+    // Remove the addLog call from here
 }

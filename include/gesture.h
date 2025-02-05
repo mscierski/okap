@@ -17,4 +17,7 @@ extern bool holdDetected;
 extern const int gestureThreshold;
 extern const int holdThreshold;
 
+// Add new variable for current distance
+extern int currentDistance;
+
 #endif
