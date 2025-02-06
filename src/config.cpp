@@ -24,3 +24,6 @@ String staticGateway = "192.168.0.1";
 String staticNetmask = "255.255.255.0";  // Add this line
 
 // ...existing code...
+
+unsigned long fanStartTime = 0;
+bool isFanRunning = false;

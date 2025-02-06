@@ -66,30 +66,53 @@ void onWebSocketEvent(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsE
     }
 }
 
-// Wysyłanie requesta na webhook
-void sendWebhookRequest(int speed) {
+// Update the webhook request function with better error handling
+void sendWebhookRequest(int speed, const String& cause, int previousSpeed) {
     if (webhookUrl.isEmpty()) {
-        Serial.println("Webhook URL jest pusty. Nie wysyłamy żądania.");
         return;
     }
 
     HTTPClient http;
     http.begin(webhookUrl);
     http.addHeader("Content-Type", "application/json");
+    http.setTimeout(5000);  // 5 second timeout
 
-    String payload = "{\"speed\":" + String(speed) + "}";
-    Serial.println("Wysyłanie requesta na webhook: " + webhookUrl);
-    Serial.println("Payload: " + payload);
-
-    int httpResponseCode = http.POST(payload);
-
-    if (httpResponseCode > 0) {
-        Serial.printf("Webhook wysłany! Kod odpowiedzi: %d\n", httpResponseCode);
-    } else {
-        Serial.printf("Błąd podczas wysyłania webhooka: %s\n", http.errorToString(httpResponseCode).c_str());
+    unsigned long runningTime = 0;
+    if (isFanRunning) {
+        runningTime = (millis() - fanStartTime) / 1000;
     }
 
+    StaticJsonDocument<512> doc;
+    doc["speed"] = speed;
+    doc["cause"] = cause;
+    doc["previousSpeed"] = previousSpeed;
+    doc["temperature"] = temperature;
+    doc["humidity"] = humidity;
+    doc["runningTime"] = runningTime;
+
+    String payload;
+    serializeJson(doc, payload);
+    
+    int httpResponseCode = http.POST(payload);
+    
+    if (httpResponseCode > 0) {
+        Serial.printf("Webhook sent! Response code: %d\n", httpResponseCode);
+    } else {
+        Serial.printf("Webhook failed! Error: %s\n", http.errorToString(httpResponseCode).c_str());
+    }
+    
     http.end();
+}
+
+// Add periodic webhook update function
+void sendPeriodicWebhook() {
+    static unsigned long lastWebhookTime = 0;
+    const unsigned long WEBHOOK_INTERVAL = 10000; // 10 seconds
+
+    if (millis() - lastWebhookTime >= WEBHOOK_INTERVAL) {
+        sendWebhookRequest(currentSpeed, "PERIODIC", currentSpeed);
+        lastWebhookTime = millis();
+    }
 }
 
 // ...existing code...
@@ -124,7 +147,7 @@ void updateSensorData() {
             
             currentSpeed = defaultSpeed;
             setFanSpeed(currentSpeed);
-            sendWebhookRequest(currentSpeed);
+            sendWebhookRequest(currentSpeed, "AUTO", 0);
         }
 
         // Log significant changes even if fan is already on
@@ -466,7 +489,7 @@ void setupWebServer() {
         addLog("API", currentSpeed, speed);
         setFanSpeed(speed);
         currentSpeed = speed;
-        sendWebhookRequest(currentSpeed);
+        sendWebhookRequest(currentSpeed, "API", currentSpeed);
         notifyClients();
         request->send(200);
     });
@@ -624,6 +647,25 @@ void setupWebServer() {
     // Add clear logs endpoint
     server.on("/clearlogs", HTTP_POST, [](AsyncWebServerRequest *request) {
         speedLogs.clear();
+        request->send(200);
+    });
+
+    // Modify the webhook endpoint handler
+    server.on("/webhook", HTTP_POST, [](AsyncWebServerRequest *request) {}, nullptr, [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
+        String body = String((char *)data).substring(0, len);
+        StaticJsonDocument<512> doc;
+        DeserializationError error = deserializeJson(doc, body);
+        
+        if (error) {
+            request->send(400, "application/json", "{\"error\":\"Invalid JSON\"}");
+            return;
+        }
+
+        String newWebhookUrl = doc["url"].as<String>();
+        webhookUrl = newWebhookUrl;  // Update the global variable
+        preferences.putString("webhook", webhookUrl);  // Save to preferences
+        
+        Serial.println("New webhook URL saved: " + webhookUrl);
         request->send(200);
     });
 

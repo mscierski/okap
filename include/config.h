@@ -62,4 +62,7 @@ extern String staticIP;
 extern String staticGateway;
 extern String staticNetmask;  // Add this line
 
+extern unsigned long fanStartTime;
+extern bool isFanRunning;
+
 #endif

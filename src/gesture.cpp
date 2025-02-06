@@ -47,11 +47,12 @@ void processGesture() {
                     Serial.println("Wykryto przytrzymanie ręki - zwiększanie biegu!");
                     int newSpeed = (currentSpeed + 1) % 5;
                     String details = "Hand hold - changing speed (distance: " + String(currentDistance) + "mm)";
+                    int oldSpeed = currentSpeed;
                     logGestureEvent(currentSpeed, newSpeed, details);
                     currentSpeed = newSpeed;
                     setFanSpeed(currentSpeed);
                     lastStepTime = millis();
-                    sendWebhookRequest(currentSpeed);
+                    sendWebhookRequest(currentSpeed, "GESTURE", oldSpeed);
                     notifyClients();
                 }
             }
@@ -59,6 +60,7 @@ void processGesture() {
             // Hand moved away - check if it was a quick gesture
             if (presenceStartTime > 0 && millis() - presenceStartTime <= 3000) {
                 Serial.println("Wykryto kliknięcie - ON/OFF!");
+                int oldSpeed = currentSpeed;
                 currentSpeed = (currentSpeed == 0) ? defaultSpeed : 0;
                 String details = "Hand gesture - " + 
                        String(currentSpeed == 0 ? "turning off" : "turning on") +
@@ -71,7 +73,7 @@ void processGesture() {
                 }
                 
                 setFanSpeed(currentSpeed);
-                sendWebhookRequest(currentSpeed);
+                sendWebhookRequest(currentSpeed, "GESTURE", oldSpeed);
                 notifyClients();
             }
             

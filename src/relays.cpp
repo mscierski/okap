@@ -16,6 +16,7 @@ void setupRelays() {
 }
 
 void setFanSpeed(int speed) {
+    int oldSpeed = currentSpeed;
     // Sterowanie prędkością wentylatora przy użyciu przekaźników
     switch (speed) {
         case 0: 
@@ -44,7 +45,13 @@ void setFanSpeed(int speed) {
             digitalWrite(RELAY_PIN3, LOW);
             break;
     }
-    int oldSpeed = currentSpeed;
+
+    if (speed == 0) {
+        isFanRunning = false;
+    } else if (oldSpeed == 0) {
+        isFanRunning = true;
+        fanStartTime = millis();
+    }
+
     currentSpeed = speed;
-    // Remove the addLog call from here
 }

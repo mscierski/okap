@@ -2,7 +2,7 @@
 #include <Wire.h>
 #include <ESPmDNS.h>  // This is the correct include for ESP32
 #include "config.h"
-#include "webserver.h"
+#include "webserver.h"  // Make sure this is included
 #include "relays.h"
 #include "gesture.h"
 #include <ArduinoOTA.h>
@@ -15,6 +15,8 @@
 int currentSpeed = 0;     // Domyślnie wentylator wyłączony
 int defaultSpeed = 1;     // Domyślny bieg wentylatora
 String webhookUrl = "";   // URL webhooka, domyślnie pusty
+
+
 
 unsigned long lastRelayLogTime = 0; // Zmienna do śledzenia czasu dla logowania
 float temperature = 0.0;
@@ -230,6 +232,10 @@ void loop() {
             Serial.printf("Current time: %s\n", timeStringBuff);
         }
         lastTimeSyncMillis = millis();
+    }
+
+    if (webhookUrl.length() > 0) {  // Only call if webhook URL is set
+        sendPeriodicWebhook();
     }
 
     // Remove MDNS.update() as it's not needed on ESP32
