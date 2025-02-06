@@ -253,6 +253,70 @@ void setupWebServer() {
         html += ".network-inputs.active { display: grid; }";
         html += ".network-inputs.inactive { display: none; }";
         html += "input[type=\"text\"] { background: #303030; border: none; color: white; padding: 8px; border-radius: 4px; width: 100%; }";
+        
+        // Update the speed control card CSS
+        html += ".card.speed-control { display: flex; flex-direction: column; padding: 30px; }";
+        html += ".speed-display-wrapper { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }";
+        html += ".speed-indicator { display: flex; flex-direction: column-reverse; gap: 4px; width: 80px; }";
+        html += ".speed-bar { height: 8px; width: 60px; background: #424242; border-radius: 4px; transition: background-color 0.3s; }";
+        html += ".speed-bar.active { background: #0288d1; }";
+        html += ".speed-bar.active-max { background: #f44336; }";
+        html += ".speed-display { border: 1px solid #303030; border-radius: 8px; padding: 15px 30px; min-width: 120px; text-align: center; }";
+        html += ".current-speed { font-size: 3.5em; font-weight: 300; color: #0288d1; margin: 0; }";
+        html += ".running-time { font-size: 1.5em; font-weight: 300; color: #757575; width: 80px; text-align: right; }";
+        html += ".speed-buttons { display: flex; gap: 8px; width: 100%; margin-top: 20px; }";
+        html += ".speed-button { flex: 1; padding: 12px; border: none; border-radius: 4px; font-size: 1.2em; cursor: pointer; }";
+        html += ".speed-button.off { background: #424242; color: white; }";
+        html += ".speed-button.off:hover { background: #616161; }";
+        html += ".speed-button.speed { background: #0288d1; color: white; }";
+        html += ".speed-button.speed:hover { background: #039be5; }";
+
+        // Update the speed display CSS to maintain consistent width
+        html += ".speed-display { ";
+        html += "  border: 1px solid #303030; ";
+        html += "  border-radius: 8px; ";
+        html += "  padding: 15px 30px; ";
+        html += "  width: 140px; ";  // Change from min-width to fixed width
+        html += "  height: 90px; ";   // Add fixed height
+        html += "  display: flex; ";
+        html += "  justify-content: center; ";
+        html += "  align-items: center; ";
+        html += "}";
+        html += ".current-speed { ";
+        html += "  font-size: 3.5em; ";
+        html += "  font-weight: 300; ";
+        html += "  color: #0288d1; ";
+        html += "  margin: 0; ";
+        html += "  line-height: 1; ";
+        html += "  width: 80px; ";    // Change from min-width to fixed width
+        html += "  text-align: center; ";
+        html += "}";
+
+        // Update the speed display CSS to maintain consistent width and centering
+        html += ".speed-display { ";
+        html += "  border: 1px solid #303030; ";
+        html += "  border-radius: 8px; ";
+        html += "  padding: 15px 30px; ";
+        html += "  width: 140px; ";
+        html += "  height: 90px; ";
+        html += "  display: flex; ";
+        html += "  justify-content: center; ";
+        html += "  align-items: center; ";
+        html += "}";
+        html += ".current-speed { ";
+        html += "  font-size: 3.5em; ";
+        html += "  font-weight: 300; ";
+        html += "  color: #0288d1; ";
+        html += "  margin: 0; ";
+        html += "  line-height: 1; ";
+        html += "  width: 100%; ";    // Changed to 100% to use full container width
+        html += "  text-align: center; ";
+        html += "  display: flex; ";   // Added flex display
+        html += "  justify-content: center; "; // Center horizontally
+        html += "  align-items: center; ";     // Center vertically
+        html += "  letter-spacing: -1px; ";    // Adjust letter spacing for "OFF"
+        html += "}";
+
         html += "</style>";
         
         html += "<body>";
@@ -263,23 +327,47 @@ void setupWebServer() {
          html += "<h2>turboOKAP</h2>";
         html += "</div>";
         
-        // Speed control card (remove the title from here)
-        html += "<div class=\"card\">";
-        //html += "<h1>turboOKAP</h1>";
-        html += "<div class=\"current-speed\" id=\"currentSpeed\">" + String(currentSpeed == 0 ? "OFF" : String(currentSpeed)) + "</div>";
+        // Replace the speed control card HTML
+        html += "<div class=\"card speed-control\">";
+        html += "<div class=\"speed-display-wrapper\">";
         html += "<div class=\"speed-indicator\">";
-        for (int i = 1; i <= 4; i++) {
-            html += "<div class=\"speed-bar" + String(currentSpeed >= i ? " active" : "") + "\"></div>";
+        for (int i = 4; i >= 1; i--) {  // Start from 4 to show bars top-to-bottom
+            String barClass = "speed-bar";
+            if (currentSpeed >= i) {  // If current speed is equal or higher than this bar level
+                barClass += (i == 4) ? " active-max" : " active";
+            }
+            html += "<div class=\"" + barClass + "\"></div>";
         }
         html += "</div>";
-        // 3. Speed Control Buttons
-        html += "<div class=\"speed-btns\">";
-        html += "<button class=\"btn btn-off\" onclick=\"setSpeed(0)\">OFF</button>";
-        for (int i = 1; i <= 4; i++) {
-            html += "<button class=\"btn\" onclick=\"setSpeed(" + String(i) + ")\">" + String(i) + "</button>";
+        
+        html += "<div class=\"speed-display\">";
+        html += "<div class=\"current-speed\" id=\"currentSpeed\">" + String(currentSpeed == 0 ? "OFF" : String(currentSpeed)) + "</div>";
+        html += "</div>";
+        
+        html += "<div class=\"running-time\" id=\"runningTime\">";
+        if (isFanRunning) {
+            unsigned long runtime = (millis() - fanStartTime) / 1000;
+            int minutes = runtime / 60;
+            int seconds = runtime % 60;
+            char timeStr[6];
+            sprintf(timeStr, "%02d:%02d", minutes, seconds);
+            html += timeStr;
+        } else {
+            html += "00:00";
         }
         html += "</div>";
         html += "</div>";
+
+        html += "<div class=\"speed-buttons\">";
+        html += "<button class=\"speed-button off\" onclick=\"setSpeed(0)\">OFF</button>";
+        for (int i = 1; i <= 4; i++) {
+            html += "<button class=\"speed-button speed\" onclick=\"setSpeed(" + String(i) + ")\">" + String(i) + "</button>";
+        }
+        html += "</div>";
+        html += "</div>";
+
+        // Continue with rest of the cards
+        // ...existing code...
 
         // 4. Temperature and Humidity
         html += "<div class=\"card\">";
